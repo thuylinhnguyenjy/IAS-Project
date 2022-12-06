@@ -20,13 +20,15 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
   late DecisionTreeClassifier tree;
 
   File? selectedApk;
-  String message = '';
+  String result = '';
+  String filename = '';
+  bool inPredict = false;
+  bool inPick = false;
 
   @override
   Widget build(BuildContext context) {
     var contractLink = Provider.of<ContractLinking>(context);
-
-    TextEditingController yourNameController = TextEditingController();
+    //TextEditingController yourNameController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -59,65 +61,93 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
                             ),
                           ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 29),
-                          child: TextFormField(
-                            controller: yourNameController,
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Your Name",
-                                hintText: "What is your name ?",
-                                icon: Icon(Icons.drive_file_rename_outline)),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 30),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.green,
-                            ),
-                            onPressed: () {
-                              contractLink.checkApk(yourNameController.text);
+                        // Padding(
+                        //   padding: const EdgeInsets.only(top: 29),
+                        //   child: TextFormField(
+                        //     controller: yourNameController,
+                        //     decoration: const InputDecoration(
+                        //         border: OutlineInputBorder(),
+                        //         labelText: "Your Name",
+                        //         hintText: "What is your name ?",
+                        //         icon: Icon(Icons.drive_file_rename_outline)),
+                        //   ),
+                        // ),
+                        // Padding(
+                        //   padding: const EdgeInsets.only(top: 30),
+                        //   child: ElevatedButton(
+                        //     style: ElevatedButton.styleFrom(
+                        //       primary: Colors.green,
+                        //     ),
+                        //     onPressed: () {
+                        //       contractLink.checkApk(yourNameController.text);
 
-                              LogUtil.e(contractLink.deployedName);
-                              yourNameController.clear();
-                            },
-                            child: const Text(
-                              'Set Name',
-                              style: TextStyle(fontSize: 30),
-                            ),
-                          ),
-                        ),
-                        RichText(
-                          text: TextSpan(
-                            children: <TextSpan>[
-                              const TextSpan(text: 'Predict Result'),
-                              if (message!.contains('0'))
-                                const TextSpan(
-                                  text: 'BENIGNWARE',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
-                              else if (message!.contains('1'))
-                                const TextSpan(
-                                  text: 'MALWARE',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                        //       LogUtil.e(contractLink.deployedName);
+                        //       yourNameController.clear();
+                        //     },
+                        //     child: const Text(
+                        //       'Set Name',
+                        //       style: TextStyle(fontSize: 30),
+                        //     ),
+                        //   ),
+                        // ),
+                        if (inPick == true)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.file_download),
+                              Text(
+                                filename,
+                                style: const TextStyle(
+                                    overflow: TextOverflow.ellipsis),
+                              ),
                             ],
                           ),
-                        ),
                         TextButton(
                           onPressed: pickApk,
                           child: const Text('Pick APK to check'),
                         ),
+
+                        if (inPick == true)
+                          ElevatedButton(
+                            onPressed: () => predictApk(contractLink),
+                            child: const Text('Predict from APK'),
+                          ),
+                        const SizedBox(height: 24),
+
+                        if (inPredict == true)
+                          const Text(
+                            'Predict Result',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+
+                        const SizedBox(height: 8),
+
+                        if (result.contains('0'))
+                          const Text(
+                            'BENIGNWARE',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          )
+                        else if (result.contains('1'))
+                          const Text(
+                            'MALWARE',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+
                         ElevatedButton(
-                          onPressed: predictApk,
-                          child: const Text('Predict from APK'),
+                          onPressed: () => sendEthToContract(contractLink),
+                          child: const Text(
+                              'Transfer contributor eth to contract'),
                         ),
                       ],
                     ),
@@ -126,15 +156,6 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
         ),
       ),
     );
-  }
-
-  void pickApk() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      selectedApk = File(result.files.single.path ?? '');
-    }
-    uploadApk();
   }
 
   uploadApk() async {
@@ -150,17 +171,58 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
     request.headers.addAll(headers);
     final response = await request.send();
 
-    http.Response res = await http.Response.fromStream(response);
-    final resjson = jsonDecode(res.body);
-    res = resjson['message'];
+    var responseString = await response.stream.bytesToString();
+    final decodedMap = json.decode(responseString);
+    setState(() {
+      filename = decodedMap['filename'];
+    });
+
+    return filename;
   }
 
-  predictApk() async {
-    final response = await http.get(
-      Uri.parse("http://192.168.137.1:5000/predict"),
-    );
+  sendEthToContract(ContractLinking contractLink) async {
+    contractLink.sendEthToContract(1);
+  }
+
+  pickApk() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      selectedApk = File(result.files.single.path ?? '');
+    }
+    uploadApk();
+
     setState(() {
-      message = response.body;
+      inPick = true;
     });
   }
+
+  predictApk(ContractLinking contractLink) async {
+    final response = await http.get(
+      Uri.parse("http://192.168.137.1:5000/predict?filename=$filename"),
+    );
+
+    //check condition
+    contractLink.withdrawFunds();
+
+    setState(() {
+      result = response.body;
+      inPredict = true;
+    });
+  }
+  // void pickApk() async {
+  //   contractLink.checkApk();
+
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+  //   if (result != null) {
+  //     selectedApk = File(result.files.single.path ?? '');
+  //   }
+  //   uploadApk();
+
+  //   setState(() {
+  //     inPick = true;
+  //   });
+  // }
+
 }

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:common_utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -11,7 +10,7 @@ class ContractLinking extends ChangeNotifier {
   final String _rpcURl = "HTTP://192.168.137.1:7545";
   final String _wsURl = "ws://192.168.137.1:7545/";
   final String _privateKey =
-      "0d58d09ce62763635ed42bd5d53c112d8fb0b760378f35b6fc1c45c744c8e993";
+      "f63294adad1ac12c7512f2ee273d1d623d8f563404454ac29835103afa3f898e";
 
   late Web3Client _client;
   late String _abiCode;
@@ -21,11 +20,12 @@ class ContractLinking extends ChangeNotifier {
 
   late DeployedContract _contract;
   late ContractFunction _successCheckCount;
-  late ContractFunction _apks;
-  late ContractFunction _checkApk;
-  late ContractEvent _checkSucceedEvent;
+  late ContractFunction _receive;
+  late ContractFunction _withdrawFunds;
 
-  late ContractFunction _yourName;
+  late ContractFunction _checkApk;
+
+  late ContractEvent _checkSucceedEvent;
 
   bool isLoading = false;
   String? deployedName;
@@ -58,33 +58,57 @@ class ContractLinking extends ChangeNotifier {
   }
 
   Future<void> getDeployedContract() async {
-    // Telling Web3dart where our contract is declared.
     _contract = DeployedContract(
         ContractAbi.fromJson(_abiCode, "CheckApk"), _contractAddress);
-    // Extracting the functions, declared in contract.
-    _successCheckCount = _contract.function("successCheckCount");
-    _apks = _contract.function("apks");
+    _receive = _contract.function("Receive");
+    _withdrawFunds = _contract.function("withdrawFunds");
     getResult();
   }
 
-  checkApk(String taskNameData) async {
+  sendEthToContract(int eth) async {
+    await _client.sendTransaction(
+      _credentials,
+      Transaction.callContract(
+        contract: _contract,
+        function: _receive,
+        parameters: [],
+        value: EtherAmount.fromUnitAndValue(
+          EtherUnit.ether,
+          1,
+        ),
+      ),
+    );
+    print('sendEthToContract succeed');
+  }
+
+  withdrawFunds() async {
+    await _client.sendTransaction(
+      _credentials,
+      Transaction.callContract(
+        contract: _contract,
+        function: _withdrawFunds,
+        parameters: [BigInt.from(200000000000000000)],
+      ),
+    );
+    print('withdrawFunds succeed');
+  }
+
+  checkApk() async {
     isLoading = true;
     notifyListeners();
-    await _client.sendTransaction(
-        _credentials,
-        Transaction.callContract(
-            contract: _contract,
-            function: _checkApk,
-            parameters: [taskNameData]));
+
+    // await _client.sendTransaction(
+    //     _credentials,
+    //     Transaction.callContract(
+    //         contract: _contract, function: _checkApk, parameters: [true]));
 
     getResult();
   }
 
   Future<void> getResult() async {
-    // Getting the current name declared in the smart contract.
-    var currentApk = await _client
-        .call(contract: _contract, function: _successCheckCount, params: []);
-    deployedName = currentApk[0].toString();
+    // var currentApk = await _client
+    //     .call(contract: _contract, function: _successCheckCount, params: []);
+    // deployedName = currentApk[0].toString();
 
     notifyListeners();
   }

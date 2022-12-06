@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
    <application
         android:name="com.chaquo.python.android.PyApplication"
-        android:label="demo"
+        android:label="IAS DEMO"
         android:icon="@mipmap/ic_launcher"
         tools:replace="android:name">
         <activity

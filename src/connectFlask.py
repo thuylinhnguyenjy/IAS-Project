@@ -17,18 +17,16 @@ def upload():
         filename = werkzeug.utils.secure_filename(apk.filename)
         apk.save("./uploaded_apk/" + filename)
         return jsonify({
-            "message": "Apk Upload Sucessfully",
             "filename": filename
-        })
-    return jsonify({
-            "message": "Apk Upload Not Sucessfully"
         })
 
 @app.route('/predict', methods=['GET'])
 def predict():
   vector = {}
-  a = APK(r'./uploaded_apk/a.envisionmobile.caa.apk')
-  perm = a.get_permissions()
+  filename = request.args.get('filename')
+  print(filename)
+  apk = APK(r'./uploaded_apk/'+filename)
+  perm = apk.get_permissions()
   perms = loadPermission()
 
   for d in perms:
