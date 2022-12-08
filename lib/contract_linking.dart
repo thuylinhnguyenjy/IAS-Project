@@ -10,7 +10,7 @@ class ContractLinking extends ChangeNotifier {
   final String _rpcURl = "HTTP://192.168.137.1:7545";
   final String _wsURl = "ws://192.168.137.1:7545/";
   final String _privateKey =
-      "f63294adad1ac12c7512f2ee273d1d623d8f563404454ac29835103afa3f898e";
+      "bbe9b8075c17c26b9d1bfcfbca68e0214cfb0dcbc2c283b0cd729a7aa7ab2cf0";
 
   late Web3Client _client;
   late String _abiCode;
@@ -20,15 +20,17 @@ class ContractLinking extends ChangeNotifier {
 
   late DeployedContract _contract;
   late ContractFunction _successCheckCount;
-  late ContractFunction _receive;
-  late ContractFunction _withdrawFunds;
-
+  late ContractFunction _giveEthToContract;
+  late ContractFunction _withdrawEth;
+  late ContractFunction _balanceOf;
   late ContractFunction _checkApk;
+  late ContractFunction _myBalance;
 
   late ContractEvent _checkSucceedEvent;
 
+  String? balanceOfSender;
+
   bool isLoading = false;
-  String? deployedName;
 
   ContractLinking() {
     initialSetup();
@@ -60,9 +62,10 @@ class ContractLinking extends ChangeNotifier {
   Future<void> getDeployedContract() async {
     _contract = DeployedContract(
         ContractAbi.fromJson(_abiCode, "CheckApk"), _contractAddress);
-    _receive = _contract.function("Receive");
-    _withdrawFunds = _contract.function("withdrawFunds");
-    getResult();
+    _myBalance = _contract.function("myBalance");
+    _giveEthToContract = _contract.function("giveEthToContract");
+    _withdrawEth = _contract.function("withdrawEth");
+    getBalance();
   }
 
   sendEthToContract(int eth) async {
@@ -70,7 +73,7 @@ class ContractLinking extends ChangeNotifier {
       _credentials,
       Transaction.callContract(
         contract: _contract,
-        function: _receive,
+        function: _giveEthToContract,
         parameters: [],
         value: EtherAmount.fromUnitAndValue(
           EtherUnit.ether,
@@ -81,35 +84,46 @@ class ContractLinking extends ChangeNotifier {
     print('sendEthToContract succeed');
   }
 
-  withdrawFunds() async {
+  withdrawEth() async {
     await _client.sendTransaction(
       _credentials,
       Transaction.callContract(
         contract: _contract,
-        function: _withdrawFunds,
-        parameters: [BigInt.from(200000000000000000)],
+        function: _withdrawEth,
+        parameters: [BigInt.from(300000000000000000)],
       ),
     );
+    getBalance();
     print('withdrawFunds succeed');
   }
 
-  checkApk() async {
-    isLoading = true;
+  getBalance() async {
+    var res = await _client
+        .call(contract: _contract, function: _myBalance, params: []);
+
+    balanceOfSender = res[0].toString();
     notifyListeners();
 
-    // await _client.sendTransaction(
-    //     _credentials,
-    //     Transaction.callContract(
-    //         contract: _contract, function: _checkApk, parameters: [true]));
-
-    getResult();
+    print('get balance succeed');
   }
 
-  Future<void> getResult() async {
-    // var currentApk = await _client
-    //     .call(contract: _contract, function: _successCheckCount, params: []);
-    // deployedName = currentApk[0].toString();
+  // checkApk() async {
+  //   isLoading = true;
+  //   notifyListeners();
 
-    notifyListeners();
-  }
+  //   // await _client.sendTransaction(
+  //   //     _credentials,
+  //   //     Transaction.callContract(
+  //   //         contract: _contract, function: _checkApk, parameters: [true]));
+
+  //   getResult();
+  // }
+
+  // Future<void> getResult() async {
+  //   var currentApk = await _client
+  //       .call(contract: _contract, function: _successCheckCount, params: []);
+  //   deployedName = currentApk[0].toString();
+
+  //   notifyListeners();
+  // }
 }

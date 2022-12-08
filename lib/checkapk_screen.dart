@@ -28,7 +28,6 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
   @override
   Widget build(BuildContext context) {
     var contractLink = Provider.of<ContractLinking>(context);
-    //TextEditingController yourNameController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -44,52 +43,26 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
                   child: Form(
                     child: Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Hello ",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 52),
-                            ),
-                            Text(
-                              contractLink.deployedName.toString(),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 52,
-                                  color: Colors.tealAccent),
-                            ),
-                          ],
+                        // Row(
+                        //   children: [
+                        //     Text(
+                        //       "My Wallet Balance: ",
+                        //       style: const TextStyle(
+                        //         fontSize: 16,
+                        //       ),
+                        //     ),
+                        //     Text(
+                        //       (contractLink.balanceOfSender ?? '0') + 'Wei',
+                        //       style: TextStyle(
+                        //         fontWeight: FontWeight.bold,
+                        //         fontSize: 16,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        SizedBox(
+                          height: 50,
                         ),
-                        // Padding(
-                        //   padding: const EdgeInsets.only(top: 29),
-                        //   child: TextFormField(
-                        //     controller: yourNameController,
-                        //     decoration: const InputDecoration(
-                        //         border: OutlineInputBorder(),
-                        //         labelText: "Your Name",
-                        //         hintText: "What is your name ?",
-                        //         icon: Icon(Icons.drive_file_rename_outline)),
-                        //   ),
-                        // ),
-                        // Padding(
-                        //   padding: const EdgeInsets.only(top: 30),
-                        //   child: ElevatedButton(
-                        //     style: ElevatedButton.styleFrom(
-                        //       primary: Colors.green,
-                        //     ),
-                        //     onPressed: () {
-                        //       contractLink.checkApk(yourNameController.text);
-
-                        //       LogUtil.e(contractLink.deployedName);
-                        //       yourNameController.clear();
-                        //     },
-                        //     child: const Text(
-                        //       'Set Name',
-                        //       style: TextStyle(fontSize: 30),
-                        //     ),
-                        //   ),
-                        // ),
                         if (inPick == true)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -106,14 +79,12 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
                           onPressed: pickApk,
                           child: const Text('Pick APK to check'),
                         ),
-
                         if (inPick == true)
                           ElevatedButton(
                             onPressed: () => predictApk(contractLink),
                             child: const Text('Predict from APK'),
                           ),
                         const SizedBox(height: 24),
-
                         if (inPredict == true)
                           const Text(
                             'Predict Result',
@@ -122,9 +93,7 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
                               fontSize: 16,
                             ),
                           ),
-
                         const SizedBox(height: 8),
-
                         if (result.contains('0'))
                           const Text(
                             'BENIGNWARE',
@@ -143,12 +112,11 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
                               fontSize: 20,
                             ),
                           ),
-
-                        ElevatedButton(
-                          onPressed: () => sendEthToContract(contractLink),
-                          child: const Text(
-                              'Transfer contributor eth to contract'),
-                        ),
+                        // ElevatedButton(
+                        //   onPressed: () => sendEthToContract(contractLink),
+                        //   child: const Text(
+                        //       'Transfer contributor eth to contract'),
+                        // ),
                       ],
                     ),
                   ),
@@ -203,26 +171,12 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
     );
 
     //check condition
-    contractLink.withdrawFunds();
+    contractLink.withdrawEth();
 
     setState(() {
       result = response.body;
       inPredict = true;
+
     });
   }
-  // void pickApk() async {
-  //   contractLink.checkApk();
-
-  //   FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-  //   if (result != null) {
-  //     selectedApk = File(result.files.single.path ?? '');
-  //   }
-  //   uploadApk();
-
-  //   setState(() {
-  //     inPick = true;
-  //   });
-  // }
-
 }
