@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:common_utils/common_utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,24 +42,7 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
                   child: Form(
                     child: Column(
                       children: [
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       "My Wallet Balance: ",
-                        //       style: const TextStyle(
-                        //         fontSize: 16,
-                        //       ),
-                        //     ),
-                        //     Text(
-                        //       (contractLink.balanceOfSender ?? '0') + 'Wei',
-                        //       style: TextStyle(
-                        //         fontWeight: FontWeight.bold,
-                        //         fontSize: 16,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        SizedBox(
+                        const SizedBox(
                           height: 50,
                         ),
                         if (inPick == true)
@@ -176,7 +158,6 @@ class _CheckApkScreenState extends State<CheckApkScreen> {
     setState(() {
       result = response.body;
       inPredict = true;
-
     });
   }
 }

@@ -19,14 +19,9 @@ class ContractLinking extends ChangeNotifier {
   late Credentials _credentials;
 
   late DeployedContract _contract;
-  late ContractFunction _successCheckCount;
   late ContractFunction _giveEthToContract;
   late ContractFunction _withdrawEth;
-  late ContractFunction _balanceOf;
-  late ContractFunction _checkApk;
   late ContractFunction _myBalance;
-
-  late ContractEvent _checkSucceedEvent;
 
   String? balanceOfSender;
 
@@ -106,24 +101,4 @@ class ContractLinking extends ChangeNotifier {
 
     print('get balance succeed');
   }
-
-  // checkApk() async {
-  //   isLoading = true;
-  //   notifyListeners();
-
-  //   // await _client.sendTransaction(
-  //   //     _credentials,
-  //   //     Transaction.callContract(
-  //   //         contract: _contract, function: _checkApk, parameters: [true]));
-
-  //   getResult();
-  // }
-
-  // Future<void> getResult() async {
-  //   var currentApk = await _client
-  //       .call(contract: _contract, function: _successCheckCount, params: []);
-  //   deployedName = currentApk[0].toString();
-
-  //   notifyListeners();
-  // }
 }

@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.light,
             primaryColor: Colors.cyan[400],
             accentColor: Colors.deepOrange[200]),
-        home: CheckApkScreen(),
+        home: const CheckApkScreen(),
       ),
     );
   }

@@ -35,7 +35,7 @@ def predict():
     else:
       vector[d]=0
   input = [ v for v in vector.values() ]
-  with open('./model_pkl' , 'rb') as f:
+  with open('./model.pkl' , 'rb') as f:
     lr = pickle.load(f)
   res = lr.predict([input])
   
