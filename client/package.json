@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "web3": "^1.8.1",
-    "web3-core-helpers": "^1.8.1"
-  }
-}

@@ -35,8 +35,6 @@ contract CheckApk {
         myBalance = address(msg.sender).balance;
         address payable recipient = payable(msg.sender);
         recipient.transfer(_amount);
-    }
-
-    // function balanceOf() public view returns (uint256) {return address(msg.sender).balance;}
+    } 
 
 }
